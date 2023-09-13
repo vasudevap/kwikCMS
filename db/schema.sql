@@ -22,7 +22,7 @@ CREATE TABLE role (
   title VARCHAR(30) NOT NULL,
   salary DECIMAL,
   department_id INT,
-  FOREIGN KEY (id)
+  FOREIGN KEY (department_id)
   REFERENCES department(id)
   ON DELETE SET DEFAULT
 );
