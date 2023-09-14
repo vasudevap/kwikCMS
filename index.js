@@ -46,10 +46,9 @@ function ViewAllRoles() {
         if(err) {
             console.log(err);
          }else{
-            console.log(`
-id  
-|${(result)}`));
-
+            console.log(`${(result)}`);
+         }
+        });
 }
 function addRole(newRole) {
 
