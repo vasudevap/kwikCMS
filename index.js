@@ -33,11 +33,7 @@ let keepGoing = true;
 //     }
 // }
 
-function renderLineBlank() {
-    console.log("\n");
-}
-
-const renderLineHeading = (columnHeadings) => {
+const renderQueryResult = (columnHeadings) => {
 
     let allHeadingsArr = Object.keys(columnHeadings[0]);
     console.log('\n');
@@ -53,16 +49,21 @@ const renderLineHeading = (columnHeadings) => {
         }
         headingsDivider_btm = headingsDivider_btm + " ";
     }
+
+    // render the heading with column names
     console.log(headingsToPrint);
+
+    // render the headings bottom border
     console.log(headingsDivider_btm);
 
+    // render the data
     console.log('\n');
 
 }
 
 function viewAllEmployees() {
     // Query Employees table
-    db.query('SELECT * FROM employee;', (err, result) => (err) ? console.log(err) : renderLineHeading(result));
+    db.query('SELECT * FROM employee;', (err, result) => (err) ? console.log(err) : renderQueryResult(result));
 }
 
 const addEmployee = (newEmp) => {
@@ -75,7 +76,7 @@ const updateEmployeeRole = (emp) => {
 }
 function ViewAllRoles() {
     // Query database
-    db.query('SELECT * FROM role;', (err, result) => (err) ? console.log(err) : renderLineHeading(result));
+    db.query('SELECT * FROM role;', (err, result) => (err) ? console.log(err) : renderQueryResult(result));
 
 }
 function addRole(newRole) {
@@ -87,7 +88,7 @@ function addRole(newRole) {
 const viewAllDepartments = () => {
 
     // Query database
-    db.query('SELECT * FROM department;', (err, result) => (err) ? console.log(err) : console.log(result));
+    db.query('SELECT * FROM department;', (err, result) => (err) ? console.log(err) : renderQueryResult(result));
 }
 
 function AddDepartment(dpt) {
