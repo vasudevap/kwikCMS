@@ -33,19 +33,36 @@ let keepGoing = true;
 //     }
 // }
 
-function renderLineBlank(){
+function renderLineBlank() {
     console.log("\n");
 }
 
-function renderLineHeading(columnHeadings, columnSizes){
-    for(let i=0; i<columnHeadings.length; i++){
+const renderLineHeading = (columnHeadings) => {
 
+    let allHeadingsArr = Object.keys(columnHeadings[0]);
+    console.log('\n');
+
+    let headingsToPrint = ' ';
+    let headingsDivider_btm = '_';
+
+    for (let i = 0; i < allHeadingsArr.length; i++) {
+        headingsToPrint = headingsToPrint + " " + allHeadingsArr[i] + " ";
+        headingsDivider_btm = headingsDivider_btm + " ";
+        for (let j = 0; j < allHeadingsArr[i].length; j++) {
+            headingsDivider_btm = headingsDivider_btm + "_";
+        }
+        headingsDivider_btm = headingsDivider_btm + " ";
     }
+    console.log(headingsToPrint);
+    console.log(headingsDivider_btm);
+
+    console.log('\n');
+
 }
 
 function viewAllEmployees() {
     // Query Employees table
-    db.query('SELECT * FROM employee;', (err, result) => (err) ? console.log(err) : console.log(result));
+    db.query('SELECT * FROM employee;', (err, result) => (err) ? console.log(err) : renderLineHeading(result));
 }
 
 const addEmployee = (newEmp) => {
@@ -74,8 +91,8 @@ const viewAllDepartments = () => {
 }
 
 function AddDepartment(dpt) {
-        // Hardcoded query: INSERT for new Role to be added to the Role table
-        db.query("INSERT INTO department (title, salary, department_id) VALUES ( ?, ?, ?);", dpt, (err, result) => (err) ? console.log(err) : console.log(result));
+    // Hardcoded query: INSERT for new Role to be added to the Role table
+    db.query("INSERT INTO department (title, salary, department_id) VALUES ( ?, ?, ?);", dpt, (err, result) => (err) ? console.log(err) : console.log(result));
 }
 
 const init = () => {
