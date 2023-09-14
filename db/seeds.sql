@@ -20,3 +20,29 @@ INSERT INTO employee (
     (Ace, Upton),
     (Jelani, Quitzon)
 );
+
+INSERT INTO role (
+    title, 
+    salary
+) VALUES (
+    ( Salesperson , 70000 ),
+    ( Lead Engineer , 160000 ),
+    ( Software Engineer , 150000 ),
+    ( Account Manager , 80000 ),
+    ( Accountant , 100000 ),
+    ( Legal Team Lead , 100000 ),
+    ( Lawyer , 100000 ),
+    ( Customer Service , 80000 ),
+    ( Sales Lead , 80000 )
+);
+
+INSERT INTO department 
+    (name) 
+ VALUES 
+    ( "IT" ),
+    ( "Sales" ),
+    ( "HR" ),
+    ( "Finance" ),
+    ( "Operations" ),
+    ( "Customer Relations" )
+;

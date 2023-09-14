@@ -8,7 +8,7 @@ USE kwikCMS_db;
 -- field- id: INT PRIMARY KEY
 -- field- name: VARCHAR(30) to hold department name
 CREATE TABLE department (
-  id INT PRIMARY KEY,
+  id INT PRIMARY KEY AUTO_INCREMENT,
   name VARCHAR(30) NOT NULL
 );
 
@@ -18,7 +18,7 @@ CREATE TABLE department (
 -- field- salary: DECIMAL to hold role salary
 -- field- department_id: INT to hold reference to department role belongs to
 CREATE TABLE role (
-  id INT PRIMARY KEY,
+  id INT PRIMARY KEY AUTO_INCREMENT,
   title VARCHAR(30) NOT NULL,
   salary DECIMAL,
   department_id INT,
