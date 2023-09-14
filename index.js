@@ -42,7 +42,13 @@ const updateEmployeeRole = (emp) => {
 }
 function ViewAllRoles() {
     // Query database
-    db.query('SELECT * FROM role;', (err, result) => (err) ? console.log(err) : console.log(JSON.parse(result)));
+    db.query('SELECT * FROM role;', (err, result) => {
+        if(err) {
+            console.log(err);
+         }else{
+            console.log(`
+id  
+|${(result)}`));
 
 }
 function addRole(newRole) {
