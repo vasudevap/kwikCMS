@@ -26,10 +26,26 @@ const mainMenu = [
 ];
 
 let keepGoing = true;
+// function render(table){
+//     // console.log(table[0].key+" "+table[0].value);
+//     for (let i=0; i<table.length; i++){
+//         console.log(Object.keys(table[i])+" "+table[i].[2]);
+//     }
+// }
+
+function renderLineBlank(){
+    console.log("\n");
+}
+
+function renderLineHeading(columnHeadings, columnSizes){
+    for(let i=0; i<columnHeadings.length; i++){
+
+    }
+}
 
 function viewAllEmployees() {
     // Query Employees table
-    db.query('SELECT * FROM employee;', (err, result) => (err) ? console.log(err) : console.log(JSON.stringify(result)));
+    db.query('SELECT * FROM employee;', (err, result) => (err) ? console.log(err) : console.log(result));
 }
 
 const addEmployee = (newEmp) => {
@@ -42,13 +58,7 @@ const updateEmployeeRole = (emp) => {
 }
 function ViewAllRoles() {
     // Query database
-    db.query('SELECT * FROM role;', (err, result) => {
-        if(err) {
-            console.log(err);
-         }else{
-            console.log(`
-id  
-|${(result)}`));
+    db.query('SELECT * FROM role;', (err, result) => (err) ? console.log(err) : console.log(result));
 
 }
 function addRole(newRole) {
