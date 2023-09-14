@@ -43,7 +43,7 @@ const renderLineHeading = (columnHeadings) => {
     console.log('\n');
 
     let headingsToPrint = ' ';
-    let headingsDivider_btm = '_';
+    let headingsDivider_btm = ' ';
 
     for (let i = 0; i < allHeadingsArr.length; i++) {
         headingsToPrint = headingsToPrint + " " + allHeadingsArr[i] + " ";
@@ -75,7 +75,7 @@ const updateEmployeeRole = (emp) => {
 }
 function ViewAllRoles() {
     // Query database
-    db.query('SELECT * FROM role;', (err, result) => (err) ? console.log(err) : console.log(result));
+    db.query('SELECT * FROM role;', (err, result) => (err) ? console.log(err) : renderLineHeading(result));
 
 }
 function addRole(newRole) {
