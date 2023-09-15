@@ -26,26 +26,100 @@ const mainMenu = [
 ];
 
 let keepGoing = true;
-// function render(table){
-//     // console.log(table[0].key+" "+table[0].value);
-//     for (let i=0; i<table.length; i++){
-//         console.log(Object.keys(table[i])+" "+table[i].[2]);
-//     }
-// }
 
-function renderLineBlank(){
-    console.log("\n");
+const findColumnWidth = (data, column) => {
+
+    // set max width to length of heading to start
+    let maxColumnWidth = Array.from(Object.keys(data[0]))[column].length;
+    // for each row
+    for (let i = 0; i < data.length; i++) {
+        // if its not null
+        if (Array.from(Object.values(data[i]))[column]) {
+            // get max width for requested column
+            // by checking each entry in the column
+            if (maxColumnWidth < Array.from(Object.values(data[i]))[column].length) {
+
+                maxColumnWidth = Array.from(Object.values(data[i]))[column].length;
+
+            }
+        }
+    }
+    return maxColumnWidth;
 }
 
-function renderLineHeading(columnHeadings, columnSizes){
-    for(let i=0; i<columnHeadings.length; i++){
+const renderQueryResult = (dataToRender) => {
 
+    let allHeadingsArr = Object.keys(dataToRender[0]);
+    console.log('\n');
+
+    // start the headings with a space
+    let headingsToPrint = ' ';
+    let headingsDivider_btm = ' ';
+    let columnWidths = [];
+
+    // for each column
+    for (let i = 0; i < allHeadingsArr.length; i++) {
+        //find max width of this 'i' column
+        columnWidths.push(findColumnWidth(dataToRender, i));
     }
+
+    // for every column
+    for (let i = 0; i < allHeadingsArr.length; i++) {
+        // add a space before and after each
+        headingsToPrint = headingsToPrint + " " + allHeadingsArr[i] + " ";
+        headingsDivider_btm = headingsDivider_btm + " ";
+        for(let j=0; j<(columnWidths[i]-allHeadingsArr[i].length); j++){
+            headingsToPrint = headingsToPrint + " ";
+            headingsDivider_btm = headingsDivider_btm + "-";
+        }
+        for (let j = 0; j < allHeadingsArr[i].length; j++) {
+            // create a bottom divider under each heading label
+            headingsDivider_btm = headingsDivider_btm + "-";
+        }
+        headingsDivider_btm = headingsDivider_btm + " ";
+    }
+
+    // render the heading with column names
+    console.log(headingsToPrint);
+
+    // render the headings bottom border
+    console.log(headingsDivider_btm);
+
+    // render the data
+    // for each row
+    for (let i = 0; i < dataToRender.length; i++) {
+        let tmp=[];
+        let dataRowToPrint = ' ';
+
+        // for each column
+        for (let j = 0; j < columnWidths.length; j++) {
+            // add a space between the columns
+            dataRowToPrint = dataRowToPrint + ' ';
+            // if the entry isn't null
+            if (Object.values(dataToRender[i])[j]) {
+                // add the column data to printout
+                dataRowToPrint = dataRowToPrint + Object.values(dataToRender[i])[j];
+                // calculate trailing empty spaces to complete column
+                let spacesToAdd = columnWidths[j] - String(Object.values(dataToRender[i])[j]).length;
+                tmp.push(Object.values(dataToRender[i])[j].length);
+                for (let k = 0; k < spacesToAdd; k++) {
+                    // add any trailing spaces to printout
+                    dataRowToPrint = dataRowToPrint + " ";
+                }
+                dataRowToPrint = dataRowToPrint+' ';
+            } else {
+                dataRowToPrint = dataRowToPrint+' ';
+            };
+        }
+        // print this row
+        console.log(dataRowToPrint);
+    }
+
 }
 
 function viewAllEmployees() {
     // Query Employees table
-    db.query('SELECT * FROM employee;', (err, result) => (err) ? console.log(err) : console.log(result));
+    db.query('SELECT * FROM employee;', (err, result) => (err) ? console.log(err) : renderQueryResult(result));
 }
 
 const addEmployee = (newEmp) => {
@@ -58,7 +132,7 @@ const updateEmployeeRole = (emp) => {
 }
 function ViewAllRoles() {
     // Query database
-    db.query('SELECT * FROM role;', (err, result) => (err) ? console.log(err) : console.log(result));
+    db.query('SELECT * FROM role;', (err, result) => (err) ? console.log(err) : renderQueryResult(result));
 
 }
 function addRole(newRole) {
@@ -70,12 +144,12 @@ function addRole(newRole) {
 const viewAllDepartments = () => {
 
     // Query database
-    db.query('SELECT * FROM department;', (err, result) => (err) ? console.log(err) : console.log(result));
+    db.query('SELECT * FROM department;', (err, result) => (err) ? console.log(err) : renderQueryResult(result));
 }
 
 function AddDepartment(dpt) {
-        // Hardcoded query: INSERT for new Role to be added to the Role table
-        db.query("INSERT INTO department (title, salary, department_id) VALUES ( ?, ?, ?);", dpt, (err, result) => (err) ? console.log(err) : console.log(result));
+    // Hardcoded query: INSERT for new Role to be added to the Role table
+    db.query("INSERT INTO department (title, salary, department_id) VALUES ( ?, ?, ?);", dpt, (err, result) => (err) ? console.log(err) : console.log(result));
 }
 
 const init = () => {
