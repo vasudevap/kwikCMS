@@ -1,6 +1,7 @@
 const inquirer = require('inquirer');
 const fs = require('fs');
 const mysql = require('mysql2');
+const { Console } = require('console');
 
 
 // Connect to DB function
@@ -68,7 +69,7 @@ const renderQueryResult = (dataToRender) => {
         // add a space before and after each
         headingsToPrint = headingsToPrint + " " + allHeadingsArr[i] + " ";
         headingsDivider_btm = headingsDivider_btm + " ";
-        for(let j=0; j<(columnWidths[i]-allHeadingsArr[i].length); j++){
+        for (let j = 0; j < (columnWidths[i] - allHeadingsArr[i].length); j++) {
             headingsToPrint = headingsToPrint + " ";
             headingsDivider_btm = headingsDivider_btm + "-";
         }
@@ -88,7 +89,7 @@ const renderQueryResult = (dataToRender) => {
     // render the data
     // for each row
     for (let i = 0; i < dataToRender.length; i++) {
-        let tmp=[];
+        let tmp = [];
         let dataRowToPrint = ' ';
 
         // for each column
@@ -106,9 +107,9 @@ const renderQueryResult = (dataToRender) => {
                     // add any trailing spaces to printout
                     dataRowToPrint = dataRowToPrint + " ";
                 }
-                dataRowToPrint = dataRowToPrint+' ';
+                dataRowToPrint = dataRowToPrint + ' ';
             } else {
-                dataRowToPrint = dataRowToPrint+' ';
+                dataRowToPrint = dataRowToPrint + ' ';
             };
         }
         // print this row
@@ -167,6 +168,7 @@ const init = () => {
             }
         ])
         .then((choice) => {
+
             // Handle user's choice from main menu
             switch (choice.menu_option) {
                 case "View All Employees":
@@ -243,9 +245,17 @@ const init = () => {
                     break;
                 case "Quit":
                     keepGoing = false;
+                    console.log(keepGoing);
                     break;
             }
-            return;
+
+            if (!keepGoing) {
+                return "\nGood Bye!";
+            } 
+
+            console.log("about to init");
+            init();
+            // return;
         })
         .catch((error) => {
             if (error.isTtyError) {
@@ -257,6 +267,8 @@ const init = () => {
 
             }
         });
+
+
 }
 
 init();
