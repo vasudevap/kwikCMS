@@ -115,6 +115,8 @@ const renderQueryResult = (dataToRender) => {
         // print this row
         console.log(dataRowToPrint);
     }
+    console.log("\n");
+    init();
 
 }
 
@@ -254,7 +256,7 @@ const init = () => {
             } 
 
             console.log("about to init");
-            init();
+            // init();
             // return;
         })
         .catch((error) => {
