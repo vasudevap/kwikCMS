@@ -246,8 +246,8 @@ const init = () => {
                     AddDepartment();
                     break;
                 case "Quit":
-                    keepGoing = false;
-                    return;
+                    console.log("\nGood Bye!\n");
+                    process.exit();
             }
         })
         .catch((error) => {
@@ -257,11 +257,8 @@ const init = () => {
             } else {
                 // Something else went wrong
                 console.log("something went wrong");
-
             }
         });
-
-
 }
 
 init();
