@@ -26,20 +26,37 @@ const mainMenu = [
 ];
 
 let keepGoing = true;
-// function render(table){
-//     // console.log(table[0].key+" "+table[0].value);
-//     for (let i=0; i<table.length; i++){
-//         console.log(Object.keys(table[i])+" "+table[i].[2]);
-//     }
-// }
 
-const renderQueryResult = (columnHeadings) => {
+const findColumnWidth = (data, column) => {
 
-    let allHeadingsArr = Object.keys(columnHeadings[0]);
+    // set max width to length of heading to start
+    let maxColumnWidth = Array.from(Object.keys(data[0]))[column].length;
+    // for each row
+    for (let i = 0; i < data.length; i++) {
+        // if its not null
+        if (Array.from(Object.values(data[i]))[column]) {
+            console.log("Field to evaluate :" + Array.from(Object.values(data[i]))[column] + " " + maxColumnWidth);
+            // get max width for requested column
+            // by checking each entry in the column
+            if (maxColumnWidth < Array.from(Object.values(data[i]))[column].length) {
+
+                maxColumnWidth = Array.from(Object.values(data[i]))[column].length;
+                console.log("Max Column Width chnaged to :" + maxColumnWidth);
+
+            }
+        }
+    }
+    return maxColumnWidth;
+}
+
+const renderQueryResult = (dataToRender) => {
+
+    let allHeadingsArr = Object.keys(dataToRender[0]);
     console.log('\n');
 
     let headingsToPrint = ' ';
     let headingsDivider_btm = ' ';
+    let columnWidths = [];
 
     for (let i = 0; i < allHeadingsArr.length; i++) {
         headingsToPrint = headingsToPrint + " " + allHeadingsArr[i] + " ";
@@ -50,6 +67,14 @@ const renderQueryResult = (columnHeadings) => {
         headingsDivider_btm = headingsDivider_btm + " ";
     }
 
+    // for each column
+    for (let i = 0; i < allHeadingsArr.length; i++) {
+        //find max width of this 'i' column
+        columnWidths.push(findColumnWidth(dataToRender, i));
+    }
+
+    console.log("colunmn widths: " + columnWidths);
+
     // render the heading with column names
     console.log(headingsToPrint);
 
@@ -58,6 +83,33 @@ const renderQueryResult = (columnHeadings) => {
 
     // render the data
     console.log('\n');
+
+    // for each row
+    for (let i = 0; i < dataToRender.length; i++) {
+
+        let dataRowToPrint = ' ';
+
+        // for each column
+        for (let j = 0; j < columnWidths.length; j++) {
+
+            // if the entry isn't null
+            if(Object.values(dataToRender[i])[j]){
+
+                // add the column data to printout
+                dataRowToPrint = dataRowToPrint + Object.values(dataToRender[i])[j];
+                // calculate trailing empty spaces to complete column
+                let spacesToAdd = columnWidths[j] - Object.values(dataToRender[i])[j].length;
+                for (let k = 0; k < spacesToAdd; k++) {
+    
+                    // add any trailing spaces to printout
+                    dataRowToPrint = dataRowToPrint + " ";
+                }
+            };
+            
+        }
+        // print this row
+        console.log(dataRowToPrint + " "+ i);
+    }
 
 }
 
