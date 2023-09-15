@@ -35,13 +35,11 @@ const findColumnWidth = (data, column) => {
     for (let i = 0; i < data.length; i++) {
         // if its not null
         if (Array.from(Object.values(data[i]))[column]) {
-            console.log("Field to evaluate :" + Array.from(Object.values(data[i]))[column] + " " + maxColumnWidth);
             // get max width for requested column
             // by checking each entry in the column
             if (maxColumnWidth < Array.from(Object.values(data[i]))[column].length) {
 
                 maxColumnWidth = Array.from(Object.values(data[i]))[column].length;
-                console.log("Max Column Width chnaged to :" + maxColumnWidth);
 
             }
         }
@@ -54,18 +52,10 @@ const renderQueryResult = (dataToRender) => {
     let allHeadingsArr = Object.keys(dataToRender[0]);
     console.log('\n');
 
+    // start the headings with a space
     let headingsToPrint = ' ';
     let headingsDivider_btm = ' ';
     let columnWidths = [];
-
-    for (let i = 0; i < allHeadingsArr.length; i++) {
-        headingsToPrint = headingsToPrint + " " + allHeadingsArr[i] + " ";
-        headingsDivider_btm = headingsDivider_btm + " ";
-        for (let j = 0; j < allHeadingsArr[i].length; j++) {
-            headingsDivider_btm = headingsDivider_btm + "_";
-        }
-        headingsDivider_btm = headingsDivider_btm + " ";
-    }
 
     // for each column
     for (let i = 0; i < allHeadingsArr.length; i++) {
@@ -73,7 +63,21 @@ const renderQueryResult = (dataToRender) => {
         columnWidths.push(findColumnWidth(dataToRender, i));
     }
 
-    console.log("colunmn widths: " + columnWidths);
+    // for every column
+    for (let i = 0; i < allHeadingsArr.length; i++) {
+        // add a space before and after each
+        headingsToPrint = headingsToPrint + " " + allHeadingsArr[i] + " ";
+        headingsDivider_btm = headingsDivider_btm + " ";
+        for(let j=0; j<(columnWidths[i]-allHeadingsArr[i].length); j++){
+            headingsToPrint = headingsToPrint + " ";
+            headingsDivider_btm = headingsDivider_btm + "-";
+        }
+        for (let j = 0; j < allHeadingsArr[i].length; j++) {
+            // create a bottom divider under each heading label
+            headingsDivider_btm = headingsDivider_btm + "-";
+        }
+        headingsDivider_btm = headingsDivider_btm + " ";
+    }
 
     // render the heading with column names
     console.log(headingsToPrint);
@@ -82,33 +86,33 @@ const renderQueryResult = (dataToRender) => {
     console.log(headingsDivider_btm);
 
     // render the data
-    console.log('\n');
-
     // for each row
     for (let i = 0; i < dataToRender.length; i++) {
-
+        let tmp=[];
         let dataRowToPrint = ' ';
 
         // for each column
         for (let j = 0; j < columnWidths.length; j++) {
-
+            // add a space between the columns
+            dataRowToPrint = dataRowToPrint + ' ';
             // if the entry isn't null
-            if(Object.values(dataToRender[i])[j]){
-
+            if (Object.values(dataToRender[i])[j]) {
                 // add the column data to printout
                 dataRowToPrint = dataRowToPrint + Object.values(dataToRender[i])[j];
                 // calculate trailing empty spaces to complete column
-                let spacesToAdd = columnWidths[j] - Object.values(dataToRender[i])[j].length;
+                let spacesToAdd = columnWidths[j] - String(Object.values(dataToRender[i])[j]).length;
+                tmp.push(Object.values(dataToRender[i])[j].length);
                 for (let k = 0; k < spacesToAdd; k++) {
-    
                     // add any trailing spaces to printout
                     dataRowToPrint = dataRowToPrint + " ";
                 }
+                dataRowToPrint = dataRowToPrint+' ';
+            } else {
+                dataRowToPrint = dataRowToPrint+' ';
             };
-            
         }
         // print this row
-        console.log(dataRowToPrint + " "+ i);
+        console.log(dataRowToPrint);
     }
 
 }
