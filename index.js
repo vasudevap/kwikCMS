@@ -247,17 +247,8 @@ const init = () => {
                     break;
                 case "Quit":
                     keepGoing = false;
-                    console.log(keepGoing);
-                    break;
+                    return;
             }
-
-            if (!keepGoing) {
-                return "\nGood Bye!";
-            } 
-
-            console.log("about to init");
-            // init();
-            // return;
         })
         .catch((error) => {
             if (error.isTtyError) {
