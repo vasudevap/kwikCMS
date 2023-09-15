@@ -26,8 +26,6 @@ const mainMenu = [
     "Quit"
 ];
 
-let keepGoing = true;
-
 const findColumnWidth = (data, column) => {
 
     // set max width to length of heading to start
@@ -115,7 +113,12 @@ const renderQueryResult = (dataToRender) => {
         // print this row
         console.log(dataRowToPrint);
     }
+
+    // space at the end of the table
     console.log("\n");
+
+    // now that the data has been output to the screen
+    // present the user with the menu
     init();
 
 }
@@ -125,8 +128,49 @@ function viewAllEmployees() {
     db.query('SELECT * FROM employee;', (err, result) => (err) ? console.log(err) : renderQueryResult(result));
 }
 
-const addEmployee = (newEmp) => {
-    db.query("INSERT INTO employee (fname, lname, role, manager_id) VALUES ( ?, ?, ?, ?);", newEmp, (err, result) => (err) ? console.log(err) : console.log(result));
+const addEmployee = () => {
+
+    let newEmployeeInfo = [];
+    inquirer
+        .prompt([
+            /* Add Employee - 1 of 3 - first name */
+            {
+                type: 'input',
+                message: `What is the employee's first name?`,
+                name: 'fname',
+            },
+            /* Add Employee - 2 of 3 - last name */
+            {
+                type: 'input',
+                message: `What is the employee's last name?`,
+                name: 'lname',
+            },
+            /* Add Employee - 2 of 3 - role */
+            {
+                type: 'input',
+                message: `What is the employee's role`,
+                name: 'role',
+            },
+            /* Add Manager - 3 of 3 - manager*/
+            {
+                type: 'input',
+                message: `Who is the employee's manager`,
+                name: 'manager',
+            },
+        ])
+        .then((answer) => {
+            // Add user to the database
+            // newEmployeeInfo=
+            console.log(answer);
+            db.query("INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ( ?, ?, ?, ?);", answer.fname, answer.lname, answer.role, answer.manager, (err, result) => (err) ? console.log(err) : console.log(result));
+            // addRole(newRoleInfo);
+        })
+        .catch((err) => {
+            (err.isTtyError) ? console.log("No prompt!") : console.log("Not sure!");
+        })
+
+        //
+    
 }
 
 const updateEmployeeRole = (emp) => {
