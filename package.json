@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "eslint": "^8.49.0",
     "inquirer": "^8.2.4",
     "mysql2": "^2.2.5"
   }
