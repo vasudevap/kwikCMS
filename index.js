@@ -1,7 +1,7 @@
 const inquirer = require('inquirer');
 const fs = require('fs');
 const mysql = require('mysql2');
-const { Console } = require('console');
+// const { Console } = require('console');
 
 
 // Connect to DB function
@@ -12,9 +12,7 @@ const db = mysql.createConnection(
         password: 'password',
         database: 'kwikCMS_db'
     },
-    console.log(`Connected to the kwikCMS_db database.`)
-);
-
+)
 const mainMenu = [
     "View All Employees",
     "Add Employee",
@@ -25,7 +23,6 @@ const mainMenu = [
     "Add Department",
     "Quit"
 ];
-
 const findColumnWidth = (data, column) => {
 
     // set max width to length of heading to start
@@ -45,7 +42,6 @@ const findColumnWidth = (data, column) => {
     }
     return maxColumnWidth;
 }
-
 const renderQueryResult = (dataToRender) => {
 
     let allHeadingsArr = Object.keys(dataToRender[0]);
@@ -122,16 +118,90 @@ const renderQueryResult = (dataToRender) => {
     init();
 
 }
-
-function viewAllEmployees() {
+const viewAllEmployees = () => {
     // Query Employees table
     db.query('SELECT * FROM employee;', (err, result) => (err) ? console.log(err) : renderQueryResult(result));
 }
+const addEmployee = async (newEmployee) => {
 
-const addEmployee = () => {
+    // Add user to the database
+    console.log("INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ( ?, ?, ?, ?);" + " " + newEmployee.fname + " " + newEmployee.lname + " " + newEmployee.role + " " + newEmployee.manager);
+    // db.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ( "?", "?", ?, ?);`, answer.fname, answer.lname, answer.role, answer.manager);
 
-    let newEmployeeInfo = [];
+    return await newEmployee.fname + " " + newEmployee.lname;
+
+}
+const updateEmployeeRole = () => {
+    db.query(`UPDATE employee SET first_name="?", last_name="?", role_id=?, manager_id=?;`, emp, (err, result) => (err) ? console.log(err) : console.log(result));
+
+}
+const ViewAllRoles = () => {
+    // Query database
+    db.query('SELECT * FROM role;', (err, result) => (err) ? console.log(err) : renderQueryResult(result));
+
+}
+const addRole = (newRole) => {
+
     inquirer
+        .prompt([
+            /* Add Role - 1 of 3 - title */
+            {
+                type: 'input',
+                message: 'What is the name of the role?',
+                name: 'title',
+            },
+            /* Add Role - 2 of 3 - salary */
+            {
+                type: 'input',
+                message: 'What is the salary for the role?',
+                name: 'salary',
+            },
+            /* Add Role - 3 of 3 - department_id */
+            {
+                type: 'input',
+                message: 'Which department does the role belong to?',
+                name: 'dept',
+            },
+        ])
+        .then((answer) => {
+
+            // Hardcoded query: INSERT for new Role to be added to the Role table
+            db.query(`INSERT INTO role (title, salary, department_id) VALUES ( "?", ?, ?);`, answer.title, answer.salary, dept, (err, result) => (err) ? console.log(err) : console.log(result));
+
+        })
+        .catch((err) => {
+            (err.isTtyError) ? console.log("No prompt!") : console.log("Not sure!");
+        });
+
+}
+const viewAllDepartments = () => {
+
+    // Query database
+    db.query('SELECT * FROM department;', (err, result) => (err) ? console.log(err) : renderQueryResult(result));
+}
+const AddDepartment = (dpt) => {
+    // Hardcoded query: INSERT for new Role to be added to the Role table
+    db.query("INSERT INTO department (title, salary, department_id) VALUES ( ?, ?, ?);", dpt, (err, result) => (err) ? console.log(err) : console.log(result));
+}
+const showMainMenu = () => {
+
+    return inquirer
+        .prompt([
+            /* Present CLI menu options for Main Menu */
+            {
+                type: 'list',
+                message: 'What would you like to do?',
+                name: 'menu_option',
+                choices: mainMenu,
+                pageSize: 7,
+                loop: true
+            }
+        ])
+}
+const showAddEmployeeMenu = () => {
+
+    return inquirer
+        /* Present CLI menu options for Add User */
         .prompt([
             /* Add Employee - 1 of 3 - first name */
             {
@@ -158,70 +228,32 @@ const addEmployee = () => {
                 name: 'manager',
             },
         ])
-        .then((answer) => {
-            // Add user to the database
-            // newEmployeeInfo=
-            console.log(answer);
-            db.query("INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ( ?, ?, ?, ?);", answer.fname, answer.lname, answer.role, answer.manager, (err, result) => (err) ? console.log(err) : console.log(result));
-            // addRole(newRoleInfo);
-        })
-        .catch((err) => {
-            (err.isTtyError) ? console.log("No prompt!") : console.log("Not sure!");
-        })
-
-        //
-    
 }
 
-const updateEmployeeRole = (emp) => {
-    db.query("UPDATE employee SET fname=?, lname=?, role=?, manager_id=?;", emp, (err, result) => (err) ? console.log(err) : console.log(result));
+// IIFE to handle async call for intialization
+(async () => {
 
-}
-function ViewAllRoles() {
-    // Query database
-    db.query('SELECT * FROM role;', (err, result) => (err) ? console.log(err) : renderQueryResult(result));
+    let quitApp = false;
 
-}
-function addRole(newRole) {
+    while (!quitApp) {
 
-    // Hardcoded query: INSERT for new Role to be added to the Role table
-    db.query("INSERT INTO role (title, salary, department_id) VALUES ( ?, ?, ?);", newRole, (err, result) => (err) ? console.log(err) : console.log(result));
+        try {
 
-}
-const viewAllDepartments = () => {
-
-    // Query database
-    db.query('SELECT * FROM department;', (err, result) => (err) ? console.log(err) : renderQueryResult(result));
-}
-
-function AddDepartment(dpt) {
-    // Hardcoded query: INSERT for new Role to be added to the Role table
-    db.query("INSERT INTO department (title, salary, department_id) VALUES ( ?, ?, ?);", dpt, (err, result) => (err) ? console.log(err) : console.log(result));
-}
-
-const init = () => {
-
-    inquirer
-        .prompt([
-            /* Pass your questions in here */
-            {
-                type: 'list',
-                message: 'What would you like to do?',
-                name: 'menu_option',
-                choices: mainMenu,
-                pageSize: 7,
-                loop: true
-            }
-        ])
-        .then((choice) => {
-
-            // Handle user's choice from main menu
-            switch (choice.menu_option) {
+            console.log("0 - starting");
+            const answers = await showMainMenu();
+            console.log('The answers are: ', answers);
+            switch (answers.menu_option) {
                 case "View All Employees":
                     viewAllEmployees();
                     break;
                 case "Add Employee":
-                    addEmployee();
+                    let empName = await showAddEmployeeMenu();
+                    let addedToDatabase = await addEmployee(empName);
+                    if (addedToDatabase) {
+                        console.log("Added " + empName.fname + " " + empName.lname + "to the database");
+                    } else {
+                        console.log("Cound not add " + empName.fname + " " + empName.lname + "to the database");
+                    }
                     break;
                 case "Update Employee Role":
                     updateEmployeeRole();
@@ -230,58 +262,6 @@ const init = () => {
                     ViewAllRoles();
                     break;
                 case "Add Role":
-                    let newRoleInfo = [];
-                    inquirer
-                        .prompt([
-                            /* Add Role - title 1 of 3 */
-                            {
-                                type: 'input',
-                                message: 'What is the name of the role?',
-                                name: 'title',
-                            }
-                        ])
-                        .then((answer) => {
-                            // Add title to newRole array
-                            newRoleInfo.push(answer.title);
-                            inquirer
-                                .prompt([
-                                    /* Add Role - salary 2 of 3 */
-                                    {
-                                        type: 'input',
-                                        message: 'What is the salary for the role?',
-                                        name: 'salary',
-                                    }
-                                ])
-                                .then((answer) => {
-                                    // Add salary input to newRole array
-                                    newRoleInfo.push(answer.salary);
-                                    inquirer
-                                        .prompt([
-                                            /* Add Role - department_id 3 of 3 */
-                                            {
-                                                type: 'input',
-                                                message: 'Which department does the role belong to?',
-                                                name: 'dept',
-                                            }
-                                        ])
-                                        .then((answer) => {
-                                            // Handle user's choice from main menu
-                                            newRoleInfo.push(answer.dept);
-                                            // console.log(newRoleInfo);
-                                            addRole(newRoleInfo);
-                                        })
-                                        .catch((err) => {
-                                            (err.isTtyError) ? console.log("No prompt!") : console.log("Not sure!");
-                                        })
-                                })
-                                .catch((err) => {
-                                    (err.isTtyError) ? console.log("No prompt!") : console.log("Not sure!");
-                                })
-                        })
-                        .catch((err) => {
-                            (err.isTtyError) ? console.log("No prompt!") : console.log("Not sure!");
-                        });
-
                     break;
                 case "View All Departments":
                     viewAllDepartments();
@@ -291,18 +271,14 @@ const init = () => {
                     break;
                 case "Quit":
                     console.log("\nGood Bye!\n");
-                    process.exit();
-            }
-        })
-        .catch((error) => {
-            if (error.isTtyError) {
-                // Prompt couldn't be rendered in the current environment
-                console.log("prompt not rendered");
-            } else {
-                // Something else went wrong
-                console.log("something went wrong");
-            }
-        });
-}
+                    quitApp = true;
 
-init();
+                // process.exit();
+            }
+            console.log('Done switch for: ', answers.menu_option);
+        } catch (err) {
+            console.error(`There was an error while talking to the API: ${err.message}`, err);
+        }
+    }
+    console.log('Done TRY');
+})();
