@@ -2,7 +2,6 @@ const inquirer = require('inquirer');
 const fs = require('fs');
 const mysql = require('mysql2');
 const { rejects } = require('assert');
-
 // DB OBJECT for CONNECTION
 const db = mysql.createConnection(
     {
@@ -12,24 +11,11 @@ const db = mysql.createConnection(
         database: 'kwikCMS_db'
     },
 )
-
-
-
-
-
-
-
-
-
 const updateEmployeeRole = () => {
     db.query(`UPDATE employee SET first_name="?", last_name="?", role_id=?, manager_id=?;`, emp, (err, result) => (err) ? console.log(err) : console.log(result));
 
 }
-const ViewAllRoles = () => {
-    // Query database
-    db.query('SELECT * FROM role;', (err, result) => (err) ? console.log(err) : renderQueryResult(result));
 
-}
 const addRole = (newRole) => {
 
     inquirer
@@ -76,24 +62,23 @@ const AddDepartment = (dpt) => {
 //
 // DB related FUNCTIONS below
 //
-const viewAllEmployees = async () => {
+const viewAllFromDB = async (queryTable) => {
     // Query Employees table
     return new Promise((resolve, reject) => {
 
         try {
-            db.query('SELECT * FROM employee;', async (err, result) => {
+            db.query(`SELECT * FROM ${queryTable};`, async (err, result) => {
                 if (err) {
                     throw (err);
                 }
                 resolve(await renderQueryResult(result));
             })
         } catch (error) {
-            console.log("DB SELECT query did not work for EMPLOYEE");
+            console.log(`DB SELECT query did not work for ${queryTable.toUpperCase()}}`);
             reject(error);
         }
     });
 }
-
 // DB function (SPECIFIC) to INSERT into database new employee
 // newEmployee : 1 object containing employee data for INSERT prepared statement
 const addEmployeeInDB = async (newEmployee) => {
@@ -385,7 +370,7 @@ const showMainMenu = () => {
             switch (answers.menu_option) {
 
                 case "View All Employees":
-                    if (!(await viewAllEmployees())) {
+                    if (!(await viewAllFromDB("employee"))) {
                         throw ("ERROR: Main: Case: Could not view employees");
                     };
                     break;
@@ -416,14 +401,18 @@ const showMainMenu = () => {
                     break;
 
                 case "View All Roles":
-                    ViewAllRoles();
+                    if (!(await viewAllFromDB("role"))) {
+                        throw ("ERROR: Main: Case: Could not view roles");
+                    };
                     break;
 
                 case "Add Role":
                     break;
 
                 case "View All Departments":
-                    viewAllDepartments();
+                    if (!(await viewAllFromDB("department"))) {
+                        throw ("ERROR: Main: Case: Could not view departments");
+                    };
                     break;
 
                 case "Add Department":
