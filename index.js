@@ -126,18 +126,19 @@ const viewAllEmployees = () => {
 const addEmployee = async (newEmployee) => {
 
     // Add user to the database
-    console.log("INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ( ?, ?, ?, ?);" + " " + newEmployee.fname + " " + newEmployee.lname + " " + newEmployee.role + " " + newEmployee.manager);
-    db.query("INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ( ?, ?, ?, ?);", newEmployee.fname,newEmployee.lname, newEmployee.role, newEmployee.manager, (err, res) => (err) ? console.log(err) : console.log(""));
-    // db.query('SELECT title FROM role;', (err, AllRolesTitles) => {
-    // prompt to find out user's Role
-    //     (err) ? console.log(err) : console.log(Object.values(rolesList.title))
-    // });
-
-    // db.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ( "?", "?", ?, ?);`, answer.fname, answer.lname, answer.role, answer.manager);
-
-    return await newEmployee.fname + " " + newEmployee.lname;
+    try {
+        db.query("INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ( ?, ?, ?, ?);", [newEmployee.fname, newEmployee.lname, newEmployee.role, newEmployee.manager], (err, result) => {
+            if (err) {
+                return false;
+            }
+        })
+    } catch (error) {
+        return false;
+    }
+    return true;
 
 }
+
 const updateEmployeeRole = () => {
     db.query(`UPDATE employee SET first_name="?", last_name="?", role_id=?, manager_id=?;`, emp, (err, result) => (err) ? console.log(err) : console.log(result));
 
@@ -205,7 +206,7 @@ const showMainMenu = () => {
             }
         ])
 }
-const getFromDB = (tableToLookIn, fieldToRetrieve, whereField, whereValue) => {
+const getFromDB = async (tableToLookIn, fieldToRetrieve, whereField, whereValue) => {
 
     // console.log(fieldToRetrieve, " ", tableToLookIn);
 
@@ -255,12 +256,11 @@ const getFromDB = (tableToLookIn, fieldToRetrieve, whereField, whereValue) => {
         let arrToReturn = [];
 
         // get results from DB
-        db.query(queryString, async (err, rowsRetrieved) => {
+        db.query(queryString, (err, rowsRetrieved) => {
             if (err) {
                 reject(err);
                 return;
             }
-            // console.log(Object.keys(rowsRetrieved[0]));
             console.log(rowsRetrieved);
 
             if (typeof fieldToRetrieve === "object") {
@@ -282,7 +282,7 @@ const getFromDB = (tableToLookIn, fieldToRetrieve, whereField, whereValue) => {
 const showAddEmployeeMenu = async () => {
 
     let allRolesTitles = [];
-    let allEmpNames = [];
+    let allFullEmpNames = [];
     let temp_EmpNames = [];
 
     // allRolesTitles =  Array.from(Object.values(getFromDB("title", "role")));
@@ -290,12 +290,14 @@ const showAddEmployeeMenu = async () => {
     temp_EmpNames = await getFromDB("employee", ["first_name", "last_name"], null, null);
 
     console.log(temp_EmpNames);
-    let = [];
-    for (i = 0; i < (temp_EmpNames.length / 2); i++) {
-        allEmpNames[i] = temp_EmpNames[i + 18] + " " + temp_EmpNames[i];
+    // since the list is all firstnames and then all lastnames in a 1-d array
+    let fullNameCount = temp_EmpNames.length / 2;
+    for (i = 0; i < fullNameCount; i++) {
+        allFullEmpNames[i] = temp_EmpNames[i + fullNameCount] + " " + temp_EmpNames[i];
     }
+
     console.log(allRolesTitles);
-    console.log(allEmpNames);
+    console.log(allFullEmpNames);
 
     return inquirer
         /* Present CLI menu options for Add User */
@@ -327,7 +329,7 @@ const showAddEmployeeMenu = async () => {
                 type: 'list',
                 message: `Who is the employee's manager`,
                 name: 'manager',
-                choices: allEmpNames,
+                choices: allFullEmpNames,
                 pageSize: 7,
                 loop: true
             },
@@ -360,7 +362,9 @@ const showAddEmployeeMenu = async () => {
 
                     newEmployee.role = roleID;
                     newEmployee.manager = managerID;
+
                     console.log(newEmployee);
+
                     let addedToDatabase = await addEmployee(newEmployee);
                     if (addedToDatabase) {
                         console.log("Added " + newEmployee.fname + " " + newEmployee.lname + "to the database");
