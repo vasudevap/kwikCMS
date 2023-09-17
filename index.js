@@ -50,11 +50,6 @@ const addRole = (newRole) => {
         });
 
 }
-const viewAllDepartments = () => {
-
-    // Query database
-    db.query('SELECT * FROM department;', (err, result) => (err) ? console.log(err) : renderQueryResult(result));
-}
 const AddDepartment = (dpt) => {
     // Hardcoded query: INSERT for new Role to be added to the Role table
     db.query("INSERT INTO department (title, salary, department_id) VALUES ( ?, ?, ?);", dpt, (err, result) => (err) ? console.log(err) : console.log(result));
@@ -79,6 +74,40 @@ const viewAllFromDB = async (queryTable) => {
         }
     });
 }
+// DB function (SPECIFIC) to INSERT into database new department
+// newDepartment : 1 object containing department data for INSERT prepared statement
+const addDepartmentInDB = async (newDepartment) => {
+
+    // Add user to the database
+    try {
+        db.query("INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ( ?, ?, ?, ?);", [newEmployee.fname, newEmployee.lname, newEmployee.role, newEmployee.manager], (err, result) => {
+            if (err) {
+                return false;
+            }
+        })
+    } catch (error) {
+        return false;
+    }
+    return true;
+
+}
+// DB function (SPECIFIC) to INSERT into database new role
+// newRole : 1 object containing role data for INSERT prepared statement
+const addRoleInDB = async (newRole) => {
+
+    // Add user to the database
+    try {
+        db.query("INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ( ?, ?, ?, ?);", [newEmployee.fname, newEmployee.lname, newEmployee.role, newEmployee.manager], (err, result) => {
+            if (err) {
+                return false;
+            }
+        })
+    } catch (error) {
+        return false;
+    }
+    return true;
+
+}
 // DB function (SPECIFIC) to INSERT into database new employee
 // newEmployee : 1 object containing employee data for INSERT prepared statement
 const addEmployeeInDB = async (newEmployee) => {
@@ -95,6 +124,27 @@ const addEmployeeInDB = async (newEmployee) => {
     }
     return true;
 
+}
+
+// DB function (GENERIC) to query database with SELECT LEFT JOIN and retrieve data:
+// tablesToLookIn : 2 or more strings for table name to search in
+// fieldsToRetrieve : 2 or more array of arrays containing fields per table array
+const getQueryFromDB = async (queryString) => {
+    // Query Employees table
+    return new Promise((resolve, reject) => {
+
+        try {
+            db.query(queryString, async (err, result) => {
+                if (err) {
+                    throw (err);
+                }
+                resolve(await renderQueryResult(result));
+            })
+        } catch (error) {
+            console.log(`DB SELECT query did not work for ${queryTable.toUpperCase()}}`);
+            reject(error);
+        }
+    });
 }
 // DB function (GENERIC) to query database with SELECT and retrieve data:
 // tableToLookIn : 1 string for table name to search in
@@ -370,7 +420,21 @@ const showMainMenu = () => {
             switch (answers.menu_option) {
 
                 case "View All Employees":
-                    if (!(await viewAllFromDB("employee"))) {
+                    let employeesQuery = `SELECT 
+                                                e.id, 
+                                                e.first_name, 
+                                                e.last_name, 
+                                                r.title, 
+                                                d.name AS department,
+                                                r.salary,
+                                                CONCAT(m.first_name," ",m.last_name) AS manager
+                                            FROM employee e
+                                                LEFT JOIN role r ON r.id = e.role_id
+                                                LEFT JOIN department d ON d.id = r.department_id
+                                                LEFT JOIN employee m ON m.id = e.manager_id
+                                            ORDER BY e.id;`;
+
+                    if (!(await getQueryFromDB(employeesQuery))) {
                         throw ("ERROR: Main: Case: Could not view employees");
                     };
                     break;
