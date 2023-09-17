@@ -1,6 +1,7 @@
 const inquirer = require('inquirer');
 const fs = require('fs');
 const mysql = require('mysql2');
+const { Console } = require('console');
 // const { Console } = require('console');
 
 
@@ -125,7 +126,12 @@ const viewAllEmployees = () => {
 const addEmployee = async (newEmployee) => {
 
     // Add user to the database
-    console.log("INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ( ?, ?, ?, ?);" + " " + newEmployee.fname + " " + newEmployee.lname + " " + newEmployee.role + " " + newEmployee.manager);
+    // console.log("INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ( ?, ?, ?, ?);" + " " + newEmployee.fname + " " + newEmployee.lname + " " + newEmployee.role + " " + newEmployee.manager);
+    // db.query('SELECT title FROM role;', (err, AllRolesTitles) => {
+    // prompt to find out user's Role
+    //     (err) ? console.log(err) : console.log(Object.values(rolesList.title))
+    // });
+
     // db.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ( "?", "?", ?, ?);`, answer.fname, answer.lname, answer.role, answer.manager);
 
     return await newEmployee.fname + " " + newEmployee.lname;
@@ -198,7 +204,56 @@ const showMainMenu = () => {
             }
         ])
 }
-const showAddEmployeeMenu = () => {
+const getFromDB = (tableToLookIn, fieldToRetrieve) => {
+
+    // console.log(fieldToRetrieve, " ", tableToLookIn);
+
+    // send a promise back so we ensure the value is received in time
+    return new Promise((resolve, reject) => {
+
+        let queryString = fieldToRetrieve[0]+" FROM " + tableToLookIn + ";";
+
+        // if more than one field was requested
+        for (let i = 1; i < fieldToRetrieve.length; i++) {
+            queryString = fieldToRetrieve[i] + ", " + queryString;
+        }
+
+        queryString = "SELECT " + queryString;
+
+        let arrToReturn = [];
+
+        // get results from DB
+        db.query(queryString, async (err, rowsRetrieved) => {
+            if (err) {
+                reject(err);
+                return;
+            }
+            // console.log(Object.keys(rowsRetrieved[0]));
+            for (let i = 0; i < rowsRetrieved.length; i++) {
+                // console.log(rowsRetrieved[i][0]);
+                arrToReturn.push(Object.values(rowsRetrieved[i])[0]);
+            }
+            // console.log(arrToReturn);
+            resolve(arrToReturn);
+        });
+    });
+}
+const showAddEmployeeMenu = async () => {
+
+    let allRolesTitles = [];
+    let allEmpNames = [];
+    let temp_EmpNames = [];
+    
+    // allRolesTitles =  Array.from(Object.values(getFromDB("title", "role")));
+    allRolesTitles = await getFromDB("role", ["title"]);
+    temp_EmpNames = await getFromDB("employee", ["first_name", "last_name"]);
+
+    let  = [];
+    for (i=0; i<(temp_EmpNames.length/2); i++){
+        allEmpNames[i]=temp_EmpNames[2*i]+" "+temp_EmpNames[(2*i)+1];
+    }
+    console.log(allRolesTitles);
+    console.log((allEmpNames));
 
     return inquirer
         /* Present CLI menu options for Add User */
@@ -217,15 +272,22 @@ const showAddEmployeeMenu = () => {
             },
             /* Add Employee - 2 of 3 - role */
             {
-                type: 'input',
+                type: 'list',
                 message: `What is the employee's role`,
                 name: 'role',
+                choices: allRolesTitles,
+                pageSize: 7,
+                loop: true
             },
             /* Add Manager - 3 of 3 - manager*/
             {
-                type: 'input',
+
+                type: 'list',
                 message: `Who is the employee's manager`,
                 name: 'manager',
+                choices: allEmpNames,
+                pageSize: 7,
+                loop: true
             },
         ])
 }
