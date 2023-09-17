@@ -274,22 +274,31 @@ const renderQueryResult = (dataToRender) => {
             for (let j = 0; j < columnWidths.length; j++) {
                 // add a space between the columns
                 dataRowToPrint = dataRowToPrint + ' ';
-                // if the entry isn't null
-                if (Object.values(dataToRender[i])[j]) {
-                    // add the column data to printout
+                // if the entry is null prevent showing blanks
+                let spacesToAdd = 0;
+
+                if (!(Object.values(dataToRender[i])[j])) {
+                    // show null on display
+                    dataRowToPrint = dataRowToPrint + "null";
+                    // calculate trailing empty spaces to complete column
+                    spacesToAdd = columnWidths[j] - "null".length;
+                    tmp.push("null");
+
+                } else {
+                    // show value in table
                     dataRowToPrint = dataRowToPrint + Object.values(dataToRender[i])[j];
                     // calculate trailing empty spaces to complete column
-                    let spacesToAdd = columnWidths[j] - String(Object.values(dataToRender[i])[j]).length;
-                    tmp.push(Object.values(dataToRender[i])[j].length);
-                    for (let k = 0; k < spacesToAdd; k++) {
-                        // add any trailing spaces to printout
-                        dataRowToPrint = dataRowToPrint + " ";
-                    }
-                    dataRowToPrint = dataRowToPrint + ' ';
-                } else {
-                    dataRowToPrint = dataRowToPrint + ' ';
-                };
-            }
+                    spacesToAdd = columnWidths[j] - String(Object.values(dataToRender[i])[j]).length;
+                    tmp.push(String(Object.values(dataToRender[i])[j]).length);
+                }
+
+                for (let k = 0; k < spacesToAdd; k++) {
+                    // add any trailing spaces to printout
+                    dataRowToPrint = dataRowToPrint + " ";
+                }
+                dataRowToPrint = dataRowToPrint + ' ';
+            };
+
             // print this row
             console.log(dataRowToPrint);
         }
@@ -298,9 +307,9 @@ const renderQueryResult = (dataToRender) => {
         console.log("\n");
 
         resolve(true);
-    })
-
+    });
 }
+
 // RENDER function (GENERIC) helper to renderQueryResult(), it determines the max column width
 // for each column to be rendered on the screen and returns an array of max column widths
 const findColumnWidth = (data, column) => {
@@ -407,7 +416,7 @@ const showMainMenu = () => {
 }
 //
 // MAIN () IIFE to handle async call for intialization
-(async () => {
+const init = async () => {
 
     let quitApp = false;
 
@@ -486,11 +495,13 @@ const showMainMenu = () => {
                 case "Quit":
                     console.log("\nGood Bye!\n");
                     quitApp = true;
-
             }
 
         } catch (err) {
             console.error(`There was an error while talking to the API: ${err.message}`, err);
         }
+
     }
-})();
+}
+
+init();
