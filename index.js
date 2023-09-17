@@ -11,10 +11,7 @@ const db = mysql.createConnection(
         database: 'kwikCMS_db'
     },
 )
-const updateEmployeeRole = () => {
-    db.query(`UPDATE employee SET first_name="?", last_name="?", role_id=?, manager_id=?;`, emp, (err, result) => (err) ? console.log(err) : console.log(result));
 
-}
 
 const addRole = (newRole) => {
 
@@ -108,9 +105,28 @@ const addEmployeeInDB = async (newEmployee) => {
     return true;
 
 }
+// DB function (GENERIC) to UPDATE a table with field provided
+// tableToUpdate : 1 table name string to be updated
+// fieldToUpate : 1 field to update passed as object with column name as key and value as value
+const updateDB = async (queryString) => {
+    // Query Employees table
+    return new Promise((resolve, reject) => {
+
+        try {
+            db.query(queryString, async (err, result) => {
+                if (err) {
+                    throw (err);
+                }
+                resolve(true);
+            })
+        } catch (error) {
+            console.log(`DB SELECT query did not work for ${queryTable.toUpperCase()}}`);
+            reject(error);
+        }
+    });
+}
 // DB function (GENERIC) to query database with SELECT LEFT JOIN and retrieve data:
-// tablesToLookIn : 2 or more strings for table name to search in
-// fieldsToRetrieve : 2 or more array of arrays containing fields per table array
+// qyerystring : a string with the query in it
 const getQueryFromDB = async (queryString) => {
     // Query Employees table
     return new Promise((resolve, reject) => {
@@ -316,13 +332,51 @@ const findColumnWidth = (data, column) => {
 // MENU related FUNCTIONS below
 //
 // MENU function (SPECIFIC) to create, display, and retrieve answers to the Add New Employee menu
+const showUpdateEmployeeRoleMenu = async () => {
+
+    let allRolesTitles = [];
+    let allEmployees = [];
+    let temp_EmpNames = [];
+
+    allRolesTitles = await getFromDB("role", ["title"], null, null);
+    temp_EmpNames = await getFromDB("employee", ["first_name", "last_name"], null, null);
+
+    // since the list is all firstnames and then all lastnames in a 1-d array
+    let fullNameCount = temp_EmpNames.length / 2;
+    for (i = 0; i < fullNameCount; i++) {
+        allEmployees[i] = temp_EmpNames[i + fullNameCount] + " " + temp_EmpNames[i];
+    }
+
+    return inquirer
+        /* Present CLI menu options for Add User */
+        .prompt([
+            /* Update Employee - 1 of 2 - employee name */
+            {
+                type: 'list',
+                message: `Which employee's role do you want to update?`,
+                name: 'name',
+                choices: allEmployees,
+                pageSize: 7,
+                loop: true
+            },
+            /* Update Employee - 2 of 2 - role */
+            {
+                type: 'list',
+                message: `Which role do you want to assign the selected employee?`,
+                name: 'role',
+                choices: allRolesTitles,
+                pageSize: 7,
+                loop: true
+            },
+        ])
+}
+// MENU function (SPECIFIC) to create, display, and retrieve answers to the Add New Employee menu
 const showAddEmployeeMenu = async () => {
 
     let allRolesTitles = [];
     let allFullEmpNames = [];
     let temp_EmpNames = [];
 
-    // allRolesTitles =  Array.from(Object.values(getFromDB("title", "role")));
     allRolesTitles = await getFromDB("role", ["title"], null, null);
     temp_EmpNames = await getFromDB("employee", ["first_name", "last_name"], null, null);
 
@@ -451,31 +505,49 @@ const init = async () => {
                     break;
 
                 case "Update Employee Role":
-                    updateEmployeeRole();
-                    break;
+                    // get employee info from user input
+                    let updateEmployee = await showUpdateEmployeeRoleMenu();
+                    console.log(updateEmployee);
+                    // get role_id from what was provided
+                //     let updateroleID = await getFromDB("role", "id", "title", updateEmployee.role);
+                //     // get manager_id from what was provided
 
-                case "View All Roles":
+                //     let updateQuery = `UPDATE 
+                //                                 r.id, 
+                //                                 r.title, 
+                //                                 d.name AS department,
+                //                                 r.salary
+                //                             FROM role r
+                //                                 LEFT JOIN department d ON r.department_id = d.id
+                //                             ORDER BY r.id;`;
 
-                    let rolesQuery = `SELECT 
-                                                r.id, 
-                                                r.title, 
-                                                d.name AS department,
-                                                r.salary
-                                            FROM role r
-                                                LEFT JOIN department d ON r.department_id = d.id
-                                            ORDER BY r.id;`;
+                //     if (!(await updateDB(updateQuery))) {
+                //         throw ("ERROR: Main: Case: Could not UPDATE employee role");
+                //     };
+                //     break;
 
-                    if (!(await getQueryFromDB(rolesQuery))) {
-                        throw ("ERROR: Main: Case: Could not view employees");
-                    };
-                    break;
+                // case "View All Roles":
+
+                //     let rolesQuery = `SELECT 
+                //                                 r.id, 
+                //                                 r.title, 
+                //                                 d.name AS department,
+                //                                 r.salary
+                //                             FROM role r
+                //                                 LEFT JOIN department d ON r.department_id = d.id
+                //                             ORDER BY r.id;`;
+
+                //     if (!(await getQueryFromDB(rolesQuery))) {
+                //         throw ("ERROR: Main: Case: Could not view employees");
+                //     };
+                //     break;
 
                 case "Add Role":
                     break;
 
                 case "View All Departments":
 
-                let departmentsQuery = `SELECT 
+                    let departmentsQuery = `SELECT 
                                                 *
                                             FROM department
                                             ORDER BY id;`;
