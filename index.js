@@ -57,23 +57,6 @@ const AddDepartment = (dpt) => {
 //
 // DB related FUNCTIONS below
 //
-const viewAllFromDB = async (queryTable) => {
-    // Query Employees table
-    return new Promise((resolve, reject) => {
-
-        try {
-            db.query(`SELECT * FROM ${queryTable};`, async (err, result) => {
-                if (err) {
-                    throw (err);
-                }
-                resolve(await renderQueryResult(result));
-            })
-        } catch (error) {
-            console.log(`DB SELECT query did not work for ${queryTable.toUpperCase()}}`);
-            reject(error);
-        }
-    });
-}
 // DB function (SPECIFIC) to INSERT into database new department
 // newDepartment : 1 object containing department data for INSERT prepared statement
 const addDepartmentInDB = async (newDepartment) => {
@@ -125,7 +108,6 @@ const addEmployeeInDB = async (newEmployee) => {
     return true;
 
 }
-
 // DB function (GENERIC) to query database with SELECT LEFT JOIN and retrieve data:
 // tablesToLookIn : 2 or more strings for table name to search in
 // fieldsToRetrieve : 2 or more array of arrays containing fields per table array
@@ -309,7 +291,6 @@ const renderQueryResult = (dataToRender) => {
         resolve(true);
     });
 }
-
 // RENDER function (GENERIC) helper to renderQueryResult(), it determines the max column width
 // for each column to be rendered on the screen and returns an array of max column widths
 const findColumnWidth = (data, column) => {
@@ -474,8 +455,18 @@ const init = async () => {
                     break;
 
                 case "View All Roles":
-                    if (!(await viewAllFromDB("role"))) {
-                        throw ("ERROR: Main: Case: Could not view roles");
+
+                    let rolesQuery = `SELECT 
+                                                r.id, 
+                                                r.title, 
+                                                d.name AS department,
+                                                r.salary
+                                            FROM role r
+                                                LEFT JOIN department d ON r.department_id = d.id
+                                            ORDER BY r.id;`;
+
+                    if (!(await getQueryFromDB(rolesQuery))) {
+                        throw ("ERROR: Main: Case: Could not view employees");
                     };
                     break;
 
@@ -483,8 +474,14 @@ const init = async () => {
                     break;
 
                 case "View All Departments":
-                    if (!(await viewAllFromDB("department"))) {
-                        throw ("ERROR: Main: Case: Could not view departments");
+
+                let departmentsQuery = `SELECT 
+                                                *
+                                            FROM department
+                                            ORDER BY id;`;
+
+                    if (!(await getQueryFromDB(departmentsQuery))) {
+                        throw ("ERROR: Main: Case: Could not view employees");
                     };
                     break;
 
