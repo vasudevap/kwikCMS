@@ -126,7 +126,8 @@ const viewAllEmployees = () => {
 const addEmployee = async (newEmployee) => {
 
     // Add user to the database
-    // console.log("INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ( ?, ?, ?, ?);" + " " + newEmployee.fname + " " + newEmployee.lname + " " + newEmployee.role + " " + newEmployee.manager);
+    console.log("INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ( ?, ?, ?, ?);" + " " + newEmployee.fname + " " + newEmployee.lname + " " + newEmployee.role + " " + newEmployee.manager);
+    db.query("INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ( ?, ?, ?, ?);", newEmployee.fname,newEmployee.lname, newEmployee.role, newEmployee.manager, (err, res) => (err) ? console.log(err) : console.log(""));
     // db.query('SELECT title FROM role;', (err, AllRolesTitles) => {
     // prompt to find out user's Role
     //     (err) ? console.log(err) : console.log(Object.values(rolesList.title))
@@ -204,22 +205,53 @@ const showMainMenu = () => {
             }
         ])
 }
-const getFromDB = (tableToLookIn, fieldToRetrieve) => {
+const getFromDB = (tableToLookIn, fieldToRetrieve, whereField, whereValue) => {
 
     // console.log(fieldToRetrieve, " ", tableToLookIn);
 
     // send a promise back so we ensure the value is received in time
     return new Promise((resolve, reject) => {
 
-        let queryString = fieldToRetrieve[0]+" FROM " + tableToLookIn + ";";
+        // create query string "FROM tablename" part
+        let queryString = " FROM " + tableToLookIn;
 
-        // if more than one field was requested
-        for (let i = 1; i < fieldToRetrieve.length; i++) {
-            queryString = fieldToRetrieve[i] + ", " + queryString;
+        if (typeof fieldToRetrieve === "object") {
+
+            // if more than one field was requested add the first
+            queryString = fieldToRetrieve[0] + queryString;
+            // add the fields second onwards to query string
+            for (let i = 1; i < fieldToRetrieve.length; i++) {
+                queryString = fieldToRetrieve[i] + ", " + queryString;
+            }
+        } else {
+            // add the one and only field to retrieve in SELECT
+            queryString = fieldToRetrieve + queryString;
         }
 
+        // add the SELECT part of the query string
         queryString = "SELECT " + queryString;
 
+        // if there is a WHERE clause, add it
+        if (whereField) {
+            // select column from table... following adds to this
+            if (typeof (whereField) === "object") {
+                // if more than one field was requested, add the first to the where clause
+                queryString = `${queryString} WHERE ${whereField[0]} = "${whereValue[0]}" AND `;
+                for (let i = 1; i < (whereField.length - 1); i++) {
+                    // add 2nd parameter onwards (if length is more than 2, otherwise this is skipped)
+                    queryString = `${queryString} ${whereField[i]} = "${whereValue[i]}"`;
+                }
+                // add the last parameter for the where and terminate query string to prep for execution
+                queryString = `${queryString} ${whereField[whereField.length - 1]} = "${whereValue[whereField.length - 1]}";`;
+            } else {
+                // add the only parameter in the where and prep for execution
+                queryString = `${queryString} WHERE ${whereField} = "${whereValue}";`
+            }
+        } else {
+            // no where field, terminate the statement for execution
+            queryString = queryString + ";";
+        }
+        console.log(queryString);
         let arrToReturn = [];
 
         // get results from DB
@@ -229,11 +261,20 @@ const getFromDB = (tableToLookIn, fieldToRetrieve) => {
                 return;
             }
             // console.log(Object.keys(rowsRetrieved[0]));
-            for (let i = 0; i < rowsRetrieved.length; i++) {
-                // console.log(rowsRetrieved[i][0]);
-                arrToReturn.push(Object.values(rowsRetrieved[i])[0]);
+            console.log(rowsRetrieved);
+
+            if (typeof fieldToRetrieve === "object") {
+                for (let i = 0; i < fieldToRetrieve.length; i++) {
+                    for (let j = 0; j < rowsRetrieved.length; j++) {
+                        arrToReturn.push(Object.values(rowsRetrieved[j])[i]);
+                    }
+                }
+            } else {
+                for (let i = 0; i < rowsRetrieved.length; i++) {
+                    arrToReturn.push(Object.values(rowsRetrieved[i])[0]);
+                }
             }
-            // console.log(arrToReturn);
+            console.log(arrToReturn);
             resolve(arrToReturn);
         });
     });
@@ -243,17 +284,18 @@ const showAddEmployeeMenu = async () => {
     let allRolesTitles = [];
     let allEmpNames = [];
     let temp_EmpNames = [];
-    
-    // allRolesTitles =  Array.from(Object.values(getFromDB("title", "role")));
-    allRolesTitles = await getFromDB("role", ["title"]);
-    temp_EmpNames = await getFromDB("employee", ["first_name", "last_name"]);
 
-    let  = [];
-    for (i=0; i<(temp_EmpNames.length/2); i++){
-        allEmpNames[i]=temp_EmpNames[2*i]+" "+temp_EmpNames[(2*i)+1];
+    // allRolesTitles =  Array.from(Object.values(getFromDB("title", "role")));
+    allRolesTitles = await getFromDB("role", ["title"], null, null);
+    temp_EmpNames = await getFromDB("employee", ["first_name", "last_name"], null, null);
+
+    console.log(temp_EmpNames);
+    let = [];
+    for (i = 0; i < (temp_EmpNames.length / 2); i++) {
+        allEmpNames[i] = temp_EmpNames[i + 18] + " " + temp_EmpNames[i];
     }
     console.log(allRolesTitles);
-    console.log((allEmpNames));
+    console.log(allEmpNames);
 
     return inquirer
         /* Present CLI menu options for Add User */
@@ -309,12 +351,21 @@ const showAddEmployeeMenu = async () => {
                     viewAllEmployees();
                     break;
                 case "Add Employee":
-                    let empName = await showAddEmployeeMenu();
-                    let addedToDatabase = await addEmployee(empName);
+                    let newEmployee = await showAddEmployeeMenu();
+                    let roleID = await getFromDB("role", "id", "title", newEmployee.role);
+                    let managerFirstName = newEmployee.manager.slice(0, newEmployee.manager.indexOf(' '));
+                    let managerLastName = newEmployee.manager.slice((newEmployee.manager.indexOf(' ') + 1), newEmployee.manager.length);
+
+                    let managerID = await getFromDB("employee", "id", ["first_name", "last_name"], [managerFirstName, managerLastName]);
+
+                    newEmployee.role = roleID;
+                    newEmployee.manager = managerID;
+                    console.log(newEmployee);
+                    let addedToDatabase = await addEmployee(newEmployee);
                     if (addedToDatabase) {
-                        console.log("Added " + empName.fname + " " + empName.lname + "to the database");
+                        console.log("Added " + newEmployee.fname + " " + newEmployee.lname + "to the database");
                     } else {
-                        console.log("Cound not add " + empName.fname + " " + empName.lname + "to the database");
+                        console.log("Cound not add " + newEmployee.fname + " " + newEmployee.lname + "to the database");
                     }
                     break;
                 case "Update Employee Role":
