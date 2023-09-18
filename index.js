@@ -474,7 +474,7 @@ const showMainMenu = () => {
         ])
 }
 // TITLE function to display the APP title upon start
-const showAppTitle = () => {
+const showAppTitle = async () => {
     console.clear;
     console.log("\n");
     console.log(`.-----------------------------------------------------.`);
@@ -494,7 +494,6 @@ const showAppTitle = () => {
     console.log(`'-----------------------------------------------------'`);
     console.log("\n");
     
-
 }
 //
 // MAIN FUNCTION to handle async call for intialization
@@ -597,7 +596,6 @@ const init = async () => {
                     let [deptID]  = await getFromDB("department", "id", "name", newRoleSpecs.dept);
                     // set dept to department ID as required by role table
                     newRoleSpecs.dept = deptID;
-                    console.log(newRoleSpecs);
                     (await addRoleInDB(newRoleSpecs)) ? console.log("Added " + newRoleSpecs.title + " to the database") : console.log("Could not add new role to database");
                     break;
 
@@ -626,6 +624,10 @@ const init = async () => {
 
         } catch (err) {
             console.error(`There was an error while talking to the API: ${err.message}`, err);
+        }
+
+        if(quitApp){
+            process.exit();
         }
 
     }

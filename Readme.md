@@ -34,6 +34,7 @@ To use the app,
 4. Choose the options from the menu to perform the tasks.
   
 # MOCKUP
+To veiw a DEMO of the app, [click here](https://drive.google.com/file/d/1qKjTTYcRjMwWA3F8VDq4y4vy_Bqil-tq/view?usp=sharing).
 
 # CONTRIBUTING
 I do not look a gift horse in the mouth!  To join me in my endeavour to rid the businesses of this world of pain staking menial tasks - send your carrier pigeons to my [gitHub](https://github.com/vasudevap)
