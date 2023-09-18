@@ -40,7 +40,7 @@ const addDepartmentInDB = async (newDepartment) => {
 const addRoleInDB = async (newRole) => {
     // Add user to the database
     try {
-        db.query("INSERT INTO role (title, salary, department_id) VALUES ( ?, ?, ?);", [newRole.title, newRole.salary, newRole.department_id], (err, result) => {
+        db.query("INSERT INTO role (title, salary, department_id) VALUES ( ?, ?, ?);", [newRole.title, newRole.salary, newRole.dept], (err, result) => {
             if (err) {
                 throw err;
             } else {
@@ -536,11 +536,11 @@ const init = async () => {
                     // get employee info from user input
                     let newEmployee = await showAddEmployeeMenu();
                     // get role_id and department_id from what was provided
-                    let [ roleID, deptID ] = await getFromDB("role", ["id","department_id"], "title", newEmployee.role);
+                    let [roleID]  = await getFromDB("role", "id", "title", newEmployee.role);
                     // get manager_id from what was provided
                     let managerFirstName = newEmployee.manager.slice(0, newEmployee.manager.indexOf(' '));
                     let managerLastName = newEmployee.manager.slice((newEmployee.manager.indexOf(' ') + 1), newEmployee.manager.length);
-                    let managerID = await getFromDB("employee", "id", ["first_name", "last_name"], [managerFirstName, managerLastName]);
+                    let [managerID] = await getFromDB("employee", "id", ["first_name", "last_name"], [managerFirstName, managerLastName]);
                     // set new employee object info
                     newEmployee.role = roleID;
                     newEmployee.manager = managerID;
@@ -593,6 +593,11 @@ const init = async () => {
                 case "Add Role":
                     // get role info from user input
                     let newRoleSpecs = await showAddRoleMenu();
+                    // get the department id using department name from department table
+                    let [deptID]  = await getFromDB("department", "id", "name", newRoleSpecs.dept);
+                    // set dept to department ID as required by role table
+                    newRoleSpecs.dept = deptID;
+                    console.log(newRoleSpecs);
                     (await addRoleInDB(newRoleSpecs)) ? console.log("Added " + newRoleSpecs.title + " to the database") : console.log("Could not add new role to database");
                     break;
 
