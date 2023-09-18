@@ -155,7 +155,6 @@ const getFromDB = async (tableToLookIn, fieldToRetrieve, whereField, whereValue)
             // no where field, terminate the statement for execution
             queryString = queryString + ";";
         }
-
         let arrToReturn = [];
 
         // get results from DB
@@ -536,8 +535,8 @@ const init = async () => {
                 case "Add Employee":
                     // get employee info from user input
                     let newEmployee = await showAddEmployeeMenu();
-                    // get role_id from what was provided
-                    let roleID = await getFromDB("role", "id", "title", newEmployee.role);
+                    // get role_id and department_id from what was provided
+                    let [ roleID, deptID ] = await getFromDB("role", ["id","department_id"], "title", newEmployee.role);
                     // get manager_id from what was provided
                     let managerFirstName = newEmployee.manager.slice(0, newEmployee.manager.indexOf(' '));
                     let managerLastName = newEmployee.manager.slice((newEmployee.manager.indexOf(' ') + 1), newEmployee.manager.length);
