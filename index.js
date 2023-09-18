@@ -525,21 +525,21 @@ const init = async () => {
                     }
                     break;
 
-                // case "View All Roles":
+                case "View All Roles":
 
-                //     let rolesQuery = `SELECT 
-                //                                 r.id, 
-                //                                 r.title, 
-                //                                 d.name AS department,
-                //                                 r.salary
-                //                             FROM role r
-                //                                 LEFT JOIN department d ON r.department_id = d.id
-                //                             ORDER BY r.id;`;
+                    let rolesQuery = `SELECT 
+                                                r.id, 
+                                                r.title, 
+                                                d.name AS department,
+                                                r.salary
+                                            FROM role r
+                                                LEFT JOIN department d ON r.department_id = d.id
+                                            ORDER BY r.id;`;
 
-                //     if (!(await getQueryFromDB(rolesQuery))) {
-                //         throw ("ERROR: Main: Case: Could not view employees");
-                //     };
-                //     break;
+                    if (!(await getQueryFromDB(rolesQuery))) {
+                        throw ("ERROR: Main: Case: Could not view employees");
+                    };
+                    break;
 
                 case "Add Role":
                     break;
