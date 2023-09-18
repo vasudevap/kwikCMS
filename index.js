@@ -13,40 +13,7 @@ const db = mysql.createConnection(
 )
 
 
-const addRole = (newRole) => {
 
-    inquirer
-        .prompt([
-            /* Add Role - 1 of 3 - title */
-            {
-                type: 'input',
-                message: 'What is the name of the role?',
-                name: 'title',
-            },
-            /* Add Role - 2 of 3 - salary */
-            {
-                type: 'input',
-                message: 'What is the salary for the role?',
-                name: 'salary',
-            },
-            /* Add Role - 3 of 3 - department_id */
-            {
-                type: 'input',
-                message: 'Which department does the role belong to?',
-                name: 'dept',
-            },
-        ])
-        .then((answer) => {
-
-            // Hardcoded query: INSERT for new Role to be added to the Role table
-            db.query(`INSERT INTO role (title, salary, department_id) VALUES ( "?", ?, ?);`, answer.title, answer.salary, dept, (err, result) => (err) ? console.log(err) : console.log(result));
-
-        })
-        .catch((err) => {
-            (err.isTtyError) ? console.log("No prompt!") : console.log("Not sure!");
-        });
-
-}
 const AddDepartment = (dpt) => {
     // Hardcoded query: INSERT for new Role to be added to the Role table
     db.query("INSERT INTO department (title, salary, department_id) VALUES ( ?, ?, ?);", dpt, (err, result) => (err) ? console.log(err) : console.log(result));
@@ -77,11 +44,13 @@ const addRoleInDB = async (newRole) => {
 
     // Add user to the database
     try {
-        db.query("INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ( ?, ?, ?, ?);", [newEmployee.fname, newEmployee.lname, newEmployee.role, newEmployee.manager], (err, result) => {
+        db.query("INSERT INTO role (title, salary, department_id) VALUES ( ?, ?, ?);", [newRole.title, newRole.salary, newRole.department_id], (err, result) => {
             if (err) {
-                return false;
+                throw err;
+            } else {
+                return true;
             }
-        })
+        });
     } catch (error) {
         return false;
     }
@@ -370,6 +339,45 @@ const showUpdateEmployeeRoleMenu = async () => {
             },
         ])
 }
+const showAddRoleMenu = async () => {
+
+    allDeptNames = await getFromDB("department", ["name"], null, null);
+
+    return inquirer
+        .prompt([
+            /* Add Role - 1 of 3 - title */
+            {
+                type: 'input',
+                message: 'What is the name of the role?',
+                name: 'title',
+            },
+            /* Add Role - 2 of 3 - salary */
+            {
+                type: 'input',
+                message: 'What is the salary for the role?',
+                name: 'salary',
+            },
+            /* Add Role - 3 of 3 - department_id */
+            {
+                type: 'list',
+                message: 'Which department does the role belong to?',
+                name: 'dept',
+                choices: allDeptNames,
+                pageSize: 7,
+                loop: true
+            },
+        ])
+        .then(async (answer) => {
+
+            return answer;
+
+        })
+        .catch((err) => {
+            (err.isTtyError) ? console.log("No prompt!") : console.log("Not sure!");
+            return false;
+        });
+
+}
 // MENU function (SPECIFIC) to create, display, and retrieve answers to the Add New Employee menu
 const showAddEmployeeMenu = async () => {
 
@@ -542,6 +550,9 @@ const init = async () => {
                     break;
 
                 case "Add Role":
+                    // get role info from user input
+                    let newRoleSpecs = await showAddRoleMenu();
+                    (await addRoleInDB(newRoleSpecs)) ? console.log("Added " + newRoleSpecs.title + " to the database") : console.log("Could not add new role to database");
                     break;
 
                 case "View All Departments":
@@ -557,7 +568,11 @@ const init = async () => {
                     break;
 
                 case "Add Department":
-                    AddDepartment();
+                    // get department info from user input
+                    let newRoleSpecs = await showAddRoleMenu();
+                    (await addRoleInDB(newRoleSpecs)) ? console.log("Added " + newRoleSpecs.title + " to the database") : console.log("Could not add new role to database");
+                    break;
+
                     break;
 
                 case "Quit":
