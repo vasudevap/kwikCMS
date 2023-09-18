@@ -40,7 +40,7 @@ const addDepartmentInDB = async (newDepartment) => {
 const addRoleInDB = async (newRole) => {
     // Add user to the database
     try {
-        db.query("INSERT INTO role (title, salary, department_id) VALUES ( ?, ?, ?);", [newRole.title, newRole.salary, newRole.department_id], (err, result) => {
+        db.query("INSERT INTO role (title, salary, department_id) VALUES ( ?, ?, ?);", [newRole.title, newRole.salary, newRole.dept], (err, result) => {
             if (err) {
                 throw err;
             } else {
@@ -155,7 +155,6 @@ const getFromDB = async (tableToLookIn, fieldToRetrieve, whereField, whereValue)
             // no where field, terminate the statement for execution
             queryString = queryString + ";";
         }
-
         let arrToReturn = [];
 
         // get results from DB
@@ -474,11 +473,35 @@ const showMainMenu = () => {
             }
         ])
 }
+// TITLE function to display the APP title upon start
+const showAppTitle = async () => {
+    console.clear;
+    console.log("\n");
+    console.log(`.-----------------------------------------------------.`);
+    console.log(`|                                                     |`);
+    console.log(`|    _____                 _                          |`);
+    console.log(`|   | ____|_ __ ___  _ __ | | ___  _   _  ___  ___    |`);
+    console.log(`|   |  _| | '_ ' _ \\\| '  \\\| |/ _ \\\| | | |/ _ \\\/ _ \\\   |`);
+    console.log(`|   | |___| | | | | | |_) | | ( ) | |_| |  __/  __/   |`);
+    console.log(`|   |_____|_| |_| |_| .__/|_|\\\___/ \\\___,|\\\___|\\\___|   |`);
+    console.log(`|    __  __         |_|            |___/              |`);
+    console.log(`|   |  \\\/  | __ _ _ __   __ _  __ _  ___ _ ___        |`);
+    console.log(`|   | |\\\/| |/ _' | '_ \\\ / _' |/ _' |/ _ \\\ ' __|       |`);
+    console.log(`|   | |  | | ( | | | | | (_| | (_| |  __/  |          |`);
+    console.log(`|   |_|  |_|\\\__,_|_| |_|\\\__,_|\\\__, |\\\___|__|          |`);
+    console.log(`|                             |___/                   |`);
+    console.log(`|                                                     |`);
+    console.log(`'-----------------------------------------------------'`);
+    console.log("\n");
+    
+}
 //
-// MAIN () IIFE to handle async call for intialization
+// MAIN FUNCTION to handle async call for intialization
 const init = async () => {
 
     let quitApp = false;
+
+    await showAppTitle();
 
     while (!quitApp) {
 
@@ -511,12 +534,12 @@ const init = async () => {
                 case "Add Employee":
                     // get employee info from user input
                     let newEmployee = await showAddEmployeeMenu();
-                    // get role_id from what was provided
-                    let roleID = await getFromDB("role", "id", "title", newEmployee.role);
+                    // get role_id and department_id from what was provided
+                    let [roleID]  = await getFromDB("role", "id", "title", newEmployee.role);
                     // get manager_id from what was provided
                     let managerFirstName = newEmployee.manager.slice(0, newEmployee.manager.indexOf(' '));
                     let managerLastName = newEmployee.manager.slice((newEmployee.manager.indexOf(' ') + 1), newEmployee.manager.length);
-                    let managerID = await getFromDB("employee", "id", ["first_name", "last_name"], [managerFirstName, managerLastName]);
+                    let [managerID] = await getFromDB("employee", "id", ["first_name", "last_name"], [managerFirstName, managerLastName]);
                     // set new employee object info
                     newEmployee.role = roleID;
                     newEmployee.manager = managerID;
@@ -569,6 +592,10 @@ const init = async () => {
                 case "Add Role":
                     // get role info from user input
                     let newRoleSpecs = await showAddRoleMenu();
+                    // get the department id using department name from department table
+                    let [deptID]  = await getFromDB("department", "id", "name", newRoleSpecs.dept);
+                    // set dept to department ID as required by role table
+                    newRoleSpecs.dept = deptID;
                     (await addRoleInDB(newRoleSpecs)) ? console.log("Added " + newRoleSpecs.title + " to the database") : console.log("Could not add new role to database");
                     break;
 
@@ -597,6 +624,10 @@ const init = async () => {
 
         } catch (err) {
             console.error(`There was an error while talking to the API: ${err.message}`, err);
+        }
+
+        if(quitApp){
+            process.exit();
         }
 
     }
