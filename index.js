@@ -474,11 +474,36 @@ const showMainMenu = () => {
             }
         ])
 }
+// TITLE function to display the APP title upon start
+const showAppTitle = () => {
+    console.clear;
+    console.log("\n");
+    console.log(`.-----------------------------------------------------.`);
+    console.log(`|                                                     |`);
+    console.log(`|    _____                 _                          |`);
+    console.log(`|   | ____|_ __ ___  _ __ | | ___  _   _  ___  ___    |`);
+    console.log(`|   |  _| | '_ ' _ \\\| '  \\\| |/ _ \\\| | | |/ _ \\\/ _ \\\   |`);
+    console.log(`|   | |___| | | | | | |_) | | ( ) | |_| |  __/  __/   |`);
+    console.log(`|   |_____|_| |_| |_| .__/|_|\\\___/ \\\___,|\\\___|\\\___|   |`);
+    console.log(`|    __  __         |_|            |___/              |`);
+    console.log(`|   |  \\\/  | __ _ _ __   __ _  __ _  ___ _ ___        |`);
+    console.log(`|   | |\\\/| |/ _' | '_ \\\ / _' |/ _' |/ _ \\\ ' __|       |`);
+    console.log(`|   | |  | | ( | | | | | (_| | (_| |  __/  |          |`);
+    console.log(`|   |_|  |_|\\\__,_|_| |_|\\\__,_|\\\__, |\\\___|__|          |`);
+    console.log(`|                             |___/                   |`);
+    console.log(`|                                                     |`);
+    console.log(`'-----------------------------------------------------'`);
+    console.log("\n");
+    
+
+}
 //
-// MAIN () IIFE to handle async call for intialization
+// MAIN FUNCTION to handle async call for intialization
 const init = async () => {
 
     let quitApp = false;
+
+    await showAppTitle();
 
     while (!quitApp) {
 
