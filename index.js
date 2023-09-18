@@ -507,24 +507,23 @@ const init = async () => {
                 case "Update Employee Role":
                     // get employee info from user input
                     let updateEmployee = await showUpdateEmployeeRoleMenu();
-                    console.log(updateEmployee);
+                    // get the role id that corresponds to the role title selected
+                    let updateroleID = await getFromDB("role", "id", "title", updateEmployee.role);
+                    // get employee id of the selected employee to use in UPDATE statement below
+                    // let emp_id = await getFromDB("employee", "id", ["first_name", "last_name"], [f_name, l_name]);
+
                     // get role_id from what was provided
-                //     let updateroleID = await getFromDB("role", "id", "title", updateEmployee.role);
-                //     // get manager_id from what was provided
-
-                //     let updateQuery = `UPDATE 
-                //                                 r.id, 
-                //                                 r.title, 
-                //                                 d.name AS department,
-                //                                 r.salary
-                //                             FROM role r
-                //                                 LEFT JOIN department d ON r.department_id = d.id
-                //                             ORDER BY r.id;`;
-
-                //     if (!(await updateDB(updateQuery))) {
-                //         throw ("ERROR: Main: Case: Could not UPDATE employee role");
-                //     };
-                //     break;
+                    let updateQuery = `UPDATE 
+                                                employee
+                                            SET role_id = ${updateroleID}
+                                            WHERE 
+                                             CONCAT(first_name, " ", last_name) = "${updateEmployee.name}";`;
+                    if (!(await updateDB(updateQuery))) {
+                        throw ("ERROR: Main: Case: Could not UPDATE employee role");
+                    } else {
+                        console.log(`Updated employee's role`);
+                    }
+                    break;
 
                 // case "View All Roles":
 
