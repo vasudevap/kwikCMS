@@ -11,9 +11,6 @@ const db = mysql.createConnection(
         database: 'kwikCMS_db'
     },
 )
-
-
-
 const AddDepartment = (dpt) => {
     // Hardcoded query: INSERT for new Role to be added to the Role table
     db.query("INSERT INTO department (title, salary, department_id) VALUES ( ?, ?, ?);", dpt, (err, result) => (err) ? console.log(err) : console.log(result));
@@ -24,24 +21,23 @@ const AddDepartment = (dpt) => {
 // DB function (SPECIFIC) to INSERT into database new department
 // newDepartment : 1 object containing department data for INSERT prepared statement
 const addDepartmentInDB = async (newDepartment) => {
-
-    // Add user to the database
-    try {
-        db.query("INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ( ?, ?, ?, ?);", [newEmployee.fname, newEmployee.lname, newEmployee.role, newEmployee.manager], (err, result) => {
-            if (err) {
-                return false;
-            }
-        })
-    } catch (error) {
-        return false;
+        // Add user to the database
+        try {
+            db.query("INSERT INTO department (name) VALUES ( ? );", [newDepartment.name], (err, result) => {
+                if (err) {
+                    throw err;
+                } else {
+                    return true;
+                }
+            });
+        } catch (error) {
+            return false;
+        }
+        return true;
     }
-    return true;
-
-}
 // DB function (SPECIFIC) to INSERT into database new role
 // newRole : 1 object containing role data for INSERT prepared statement
 const addRoleInDB = async (newRole) => {
-
     // Add user to the database
     try {
         db.query("INSERT INTO role (title, salary, department_id) VALUES ( ?, ?, ?);", [newRole.title, newRole.salary, newRole.department_id], (err, result) => {
@@ -55,12 +51,10 @@ const addRoleInDB = async (newRole) => {
         return false;
     }
     return true;
-
 }
 // DB function (SPECIFIC) to INSERT into database new employee
 // newEmployee : 1 object containing employee data for INSERT prepared statement
 const addEmployeeInDB = async (newEmployee) => {
-
     // Add user to the database
     try {
         db.query("INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ( ?, ?, ?, ?);", [newEmployee.fname, newEmployee.lname, newEmployee.role, newEmployee.manager], (err, result) => {
@@ -72,7 +66,6 @@ const addEmployeeInDB = async (newEmployee) => {
         return false;
     }
     return true;
-
 }
 // DB function (GENERIC) to UPDATE a table with field provided
 // tableToUpdate : 1 table name string to be updated
@@ -339,6 +332,30 @@ const showUpdateEmployeeRoleMenu = async () => {
             },
         ])
 }
+// MENU function (SPECIFIC) to create, display, and retrieve answers to the Add New Department menu
+const showAddDeptMenu = async () => {
+
+    return inquirer
+        .prompt([
+            /* Add Department - 1 of 1 - name */
+            {
+                type: 'input',
+                message: 'What is the name of the department?',
+                name: 'name',
+            },
+        ])
+        .then(async (answer) => {
+
+            return await answer;
+
+        })
+        .catch((err) => {
+            (err.isTtyError) ? console.log("No prompt!") : console.log("Not sure!");
+            return false;
+        });
+
+}
+// MENU function (SPECIFIC) to create, display, and retrieve answers to the Add New Role menu
 const showAddRoleMenu = async () => {
 
     allDeptNames = await getFromDB("department", ["name"], null, null);
@@ -369,7 +386,7 @@ const showAddRoleMenu = async () => {
         ])
         .then(async (answer) => {
 
-            return answer;
+            return await answer;
 
         })
         .catch((err) => {
@@ -569,10 +586,8 @@ const init = async () => {
 
                 case "Add Department":
                     // get department info from user input
-                    let newRoleSpecs = await showAddRoleMenu();
-                    (await addRoleInDB(newRoleSpecs)) ? console.log("Added " + newRoleSpecs.title + " to the database") : console.log("Could not add new role to database");
-                    break;
-
+                    let newDeptSpecs = await showAddDeptMenu();
+                    (await addDepartmentInDB(newDeptSpecs)) ? console.log("Added " + newDeptSpecs.name + " to the database") : console.log("Could not add new department to database");
                     break;
 
                 case "Quit":
